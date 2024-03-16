@@ -1,5 +1,6 @@
 from re import T
 import pygame
+import math
 
 global WIDTH, HEIGHT, FPS, BLACK, WHITE, running
 global player1_coord
@@ -16,7 +17,7 @@ win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Solar Fight v0.1")
 
 # Loading
-imgt = "C:\\Users\\Станислав\\Documents\\GitHub\\solar_fight\\images\\"
+imgt = "images\\"
 player1_img = pygame.image.load(imgt+"andr.png")
 player1_img = pygame.transform.scale(player1_img, (100, 100))
 
@@ -46,20 +47,32 @@ def exit_func():
 
 
 player1_coord = [0, 0]
+player1_direct = [0, 0]
 running = True
+SPEED = 2
 while running:
     exit_func()
     nframe()
     clock.tick(FPS)
     
+
+    player1_direct = [0, 0]
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        player1_coord[1]-=5
-    elif keys[pygame.K_s]:
-        player1_coord[1]+=5
+        player1_direct[1]-=1
+    if keys[pygame.K_s]:
+        player1_direct[1]+=1
     if keys[pygame.K_a]:
-        player1_coord[0]-=5
-    elif keys[pygame.K_d]:
-        player1_coord[0]+=5
+        player1_direct[0]-=1
+    if keys[pygame.K_d]:
+        player1_direct[0]+=1
+    
+    modulo = ( player1_direct[0]**2 + player1_direct[1]**2 )**0.5
+    if modulo != 0:
+        player1_direct[0] /= modulo
+        player1_direct[1] /= modulo
+        
+    player1_coord[0] += math.floor(player1_direct[0] * SPEED)
+    player1_coord[1] += math.floor(player1_direct[1] * SPEED)
 
 pygame.quit()
