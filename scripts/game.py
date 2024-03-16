@@ -56,16 +56,17 @@ while running:
     clock.tick(FPS)
     
 
-    player1_direct = [0, 0]
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        player1_direct[1]-=1
+        player1_direct[1]-=0.05
     if keys[pygame.K_s]:
-        player1_direct[1]+=1
+        player1_direct[1]+=0.05
     if keys[pygame.K_a]:
-        player1_direct[0]-=1
+        player1_direct[0]-=0.05
     if keys[pygame.K_d]:
-        player1_direct[0]+=1
+        player1_direct[0]+=0.05
+    if not(keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]):
+        player1_direct = [0, 0]
     
     modulo = ( player1_direct[0]**2 + player1_direct[1]**2 )**0.5
     if modulo != 0:
