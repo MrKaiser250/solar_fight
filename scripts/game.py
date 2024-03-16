@@ -2,7 +2,7 @@ from re import T
 import pygame
 import math
 
-global WIDTH, HEIGHT, FPS, BLACK, WHITE, running
+global WIDTH, HEIGHT, FPS, BLACK, WHITE, SPEED, running
 global player1_coord
 
 pygame.init()
