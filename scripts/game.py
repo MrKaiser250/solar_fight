@@ -2,22 +2,28 @@ from re import T
 import pygame
 
 global WIDTH, HEIGHT, FPS, BLACK, WHITE, running
+global player1_coord
 
 pygame.init()
 clock = pygame.time.Clock()
 WIDTH, HEIGHT = 1280, 720
-FPS = 30
-BLACK = (0,0,0)
+FPS = 60
+BLACK = (0,0,50)
 WHITE = (255,255,255)
 
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Solar Fight")
+pygame.display.set_caption("Solar Fight v0.1")
+
+# Loading
+imgt = "C:\\Users\\Станислав\\Documents\\GitHub\\solar_fight\\images\\"
+player1_img = pygame.image.load(imgt+"andr.png")
+player1_img = pygame.transform.scale(player1_img, (100, 100))
 
 def nframe():
 	global BLACK, WHITE, x_rec, y_rec
 	win.fill(BLACK)
-	pygame.draw.rect(win, WHITE, pygame.Rect(x_rec, y_rec, 20, 20))
+	win.blit(player1_img, player1_coord)
 	pygame.display.flip()
 
 def custom_delay(duration):
@@ -39,17 +45,21 @@ def exit_func():
 
 
 
-x_rec = 0
-y_rec = 0
+player1_coord = [0, 0]
 running = True
 while running:
     exit_func()
-    
-    x_rec+=10
-    y_rec+=10
-    custom_delay(1000)
-    
     nframe()
     clock.tick(FPS)
+    
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        player1_coord[1]-=5
+    elif keys[pygame.K_s]:
+        player1_coord[1]+=5
+    if keys[pygame.K_a]:
+        player1_coord[0]-=5
+    elif keys[pygame.K_d]:
+        player1_coord[0]+=5
 
 pygame.quit()
