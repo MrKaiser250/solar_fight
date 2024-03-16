@@ -49,7 +49,7 @@ def exit_func():
 player1_coord = [0, 0]
 player1_direct = [0, 0]
 running = True
-SPEED = 2
+SPEED = 5
 while running:
     exit_func()
     nframe()
