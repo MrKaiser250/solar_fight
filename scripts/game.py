@@ -11,23 +11,24 @@ WHITE = (255,255,255)
 
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Cursor-Battle")
+pygame.display.set_caption("Solar Fight")
 
 def nframe():
-	global mouse_coords, client_mouse_coords, GREEN, BLACK, WHITE, draw_white, draw_green
+	global BLACK, WHITE
 	win.fill(BLACK)
 	pygame.draw.rect(win, WHITE, pygame.Rect(0, 0, 20, 20))
 	pygame.display.flip()
 
-while True:
-	running = True
-	while running:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
+running = True
+while running:
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			running = False
+		elif event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_ESCAPE:
 				running = False
-			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:
-					running = False
 			
-		nframe()
-		clock.tick(FPS)
+	nframe()
+	clock.tick(FPS)
+
+pygame.quit()
