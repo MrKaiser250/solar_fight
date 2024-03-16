@@ -65,11 +65,18 @@ while running:
         player1_direct[0]-=0.05
     if keys[pygame.K_d]:
         player1_direct[0]+=0.05
-    if not(keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]):
-        player1_direct = [0, 0]
-    
+        
     modulo = ( player1_direct[0]**2 + player1_direct[1]**2 )**0.5
-    if modulo != 0:
+    if not(keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]) and modulo > 0:
+        if modulo <= 0.075:
+            player1_direct = [0, 0]
+        else:
+            if player1_direct[0] != 0:
+                player1_direct[0] -= player1_direct[0]/abs(player1_direct[0])*0.05
+            if player1_direct[1] != 0:
+                player1_direct[1] -= player1_direct[1]/abs(player1_direct[1])*0.05
+    
+    if modulo > 1:
         player1_direct[0] /= modulo
         player1_direct[1] /= modulo
         
