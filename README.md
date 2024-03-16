@@ -1,3 +1,3 @@
 # solar_fight
 Andrew and me
-Stas is gay
+Stas and Andrew is gay
