@@ -72,7 +72,13 @@ while running:
         player1_direct[0] /= modulo
         player1_direct[1] /= modulo
         
-    player1_coord[0] += math.floor(player1_direct[0] * SPEED)
-    player1_coord[1] += math.floor(player1_direct[1] * SPEED)
+    if player1_direct[0]>=0:
+        player1_coord[0] += math.floor(player1_direct[0] * SPEED)
+    else:
+        player1_coord[0] += math.ceil(player1_direct[0] * SPEED)
+    if player1_direct[1]>=0:
+        player1_coord[1] += math.floor(player1_direct[1] * SPEED)
+    else:
+        player1_coord[1] += math.ceil(player1_direct[1] * SPEED)
 
 pygame.quit()
