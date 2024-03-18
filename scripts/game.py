@@ -15,6 +15,8 @@ class Character:
         img = pygame.image.load(image[0])
         img = pygame.transform.scale(img, (image[1], image[2]))
         self.texture = img
+        self.width = image[1]
+        self.height = image[2]
         self.curr_flip = image[3]
         self.coord = coord
         self.speed = speed
@@ -27,6 +29,8 @@ class Character:
             ids=copy.deepcopy(self.ids, memo),
             name=copy.deepcopy(self.name, memo),
             texture=copy.deepcopy(self.texture, memo),
+            width=copy.deepcopy(self.width, memo),
+            height=copy.deepcopy(self.height, memo),
             curr_flip=copy.deepcopy(self.curr_flip, memo),
             coord=copy.deepcopy(self.coord, memo),
             speed=copy.deepcopy(self.speed, memo),
@@ -133,6 +137,15 @@ while running:
         else:
             char.coord[1] += math.ceil(char.direct[1] * char.speed)
         
+        if char.coord[0]+char.width>WIDTH:
+            char.coord[0] = WIDTH - char.width
+        elif char.coord[0] < 0:
+            char.coord[0] = 0
+        if char.coord[1]+char.height>HEIGHT:
+            char.coord[1] = HEIGHT - char.height
+        elif char.coord[1] < 0:
+            char.coord[1] = 0
+
         if char.flip == 0 and char.acc[0] > 0:
             char.flip = 1
         elif char.flip == 1 and char.acc[0] < 0:
