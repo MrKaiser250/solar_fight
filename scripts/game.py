@@ -50,7 +50,7 @@ class Character:
 clock = pygame.time.Clock()
 WIDTH, HEIGHT = 1280, 720
 FPS = 60
-BACKGROUND = [0,0,50,0]
+BACKGROUND = [0,0,10,0]
 WHITE = (255,255,255)
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Solar Fight v0.2")
@@ -67,7 +67,7 @@ characters = [
 
 # Textures
 textures = [
-    pygame.transform.scale(pygame.image.load(imgt+"background.png"), (WIDTH+2*ANIM_X, HEIGHT+2*ANIM_Y))
+    pygame.transform.scale(pygame.image.load(imgt+"background2.png"), (WIDTH+2*ANIM_X, HEIGHT+2*ANIM_Y))
     ]
 
 # Sounds
@@ -79,7 +79,7 @@ sounds = [
 def nframe():
     global BACKGROUND
     global characters, textures
-    # win.fill((BACKGROUND[0], BACKGROUND[1], BACKGROUND[2]))
+    win.fill((BACKGROUND[0], BACKGROUND[1], BACKGROUND[2]))
     vert_anim = ANIM_Y*math.sin( (timer_curr[1] - timer_last[1])/1000*math.pi*2 )
     hor_anim = ANIM_X*math.sin( (timer_curr[1] - timer_last[1])/2000*math.pi*2 )
     win.blit(textures[0], (hor_anim-ANIM_X, vert_anim-ANIM_Y))
@@ -136,9 +136,9 @@ while running:
         BACKGROUND[2] += 1
     elif BACKGROUND[3] == 1:
         BACKGROUND[2] -= 1  
-    if BACKGROUND[3] == 0 and BACKGROUND[2] >= 120:
+    if BACKGROUND[3] == 0 and BACKGROUND[2] >= 30:
         BACKGROUND[3] = 1
-    elif BACKGROUND[3] == 1 and BACKGROUND[2] <= 30:
+    elif BACKGROUND[3] == 1 and BACKGROUND[2] <= 10:
         BACKGROUND[3] = 0
 
     # Character in-game processing
