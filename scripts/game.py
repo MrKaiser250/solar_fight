@@ -1,4 +1,4 @@
-from re import T
+from re import I, T
 from turtle import back
 import pygame
 import math
@@ -11,24 +11,25 @@ global characters, sounds, textures
 pygame.init()
 pygame.mixer.init()
 
-font_name = pygame.font.SysFont(None, 37)
+font_name = pygame.font.SysFont("Impact", 37)
 
 class Character:
     def __init__(self, ids=0, name="", image=["", 100, 100, 0], coord = [0, 0], speed = 3, flip = 0, direct = [0, 0], acc = [0, 0]):
         self.ids = ids
         self.name = name
         self.name_render = font_name.render(name,True,WHITE)
-        img = pygame.image.load(image[0])
-        img = pygame.transform.scale(img, (image[1], image[2]))
+        image2 = list(image)
+        img = pygame.image.load(image2[0])
+        img = pygame.transform.scale(img, (image2[1], image2[2]))
         self.texture = img
-        self.width = image[1]
-        self.height = image[2]
-        self.curr_flip = image[3]
-        self.coord = coord
+        self.width = image2[1]
+        self.height = image2[2]
+        self.curr_flip = image2[3]
+        self.coord = list(coord)
         self.speed = speed
         self.flip = flip
-        self.direct = direct
-        self.acc = acc
+        self.direct = list(direct)
+        self.acc = list(acc)
 
     def __deepcopy__(self, memo=None):
         new_char = Character(
@@ -74,7 +75,8 @@ textures = [
 # Sounds
 sd = "sounds\\"
 sounds = [
-    pygame.mixer.Sound(sd+"music.mp3")
+    pygame.mixer.Sound(sd+"music.mp3"),
+    pygame.mixer.Sound(sd+"eaten.mp3")
     ]
 
 def nframe():
@@ -106,6 +108,8 @@ def exit_func():
             if event.key == pygame.K_ESCAPE:
                 running = False
       
+def distance(char1, char2):
+    return ((char1.coord[0]+char1.width/2-char2.coord[0]-char2.width/2)**2 + (char1.coord[1]+char1.height/2-char2.coord[1]-char2.height/2)**2)**0.5
 
 
 # --=Game~Code=-- #
@@ -180,42 +184,7 @@ while running:
                 char.acc[0]= 0.05
                 control_check = True
 
-
-        # Char movement
-        char.direct[0] += char.acc[0]
-        char.direct[1] += char.acc[1]
-        modulo = ( char.direct[0]**2 + char.direct[1]**2 )**0.5
-        if control_check == False and modulo > 0:
-            if modulo <= 0.075:
-                char.direct = [0, 0]
-            else:
-                if char.direct[0] != 0:
-                    char.direct[0] -= char.direct[0]/abs(char.direct[0])*0.05
-                if char.direct[1] != 0:
-                    char.direct[1] -= char.direct[1]/abs(char.direct[1])*0.05
-    
-        if modulo > 1:
-            char.direct[0] /= modulo
-            char.direct[1] /= modulo
-        
-        if char.direct[0]>=0:
-            char.coord[0] += char.direct[0] * char.speed
-        else:
-            char.coord[0] += char.direct[0] * char.speed
-        if char.direct[1]>=0:
-            char.coord[1] += char.direct[1] * char.speed
-        else:
-            char.coord[1] += char.direct[1] * char.speed
-        
-        if char.coord[0]+char.width>WIDTH:
-            char.coord[0] = WIDTH - char.width
-        elif char.coord[0] < 0:
-            char.coord[0] = 0
-        if char.coord[1]+char.height>HEIGHT:
-            char.coord[1] = HEIGHT - char.height
-        elif char.coord[1] < 0:
-            char.coord[1] = 0
-
+        # Flip
         if char.flip == 0 and char.acc[0] > 0:
             char.flip = 1
         elif char.flip == 1 and char.acc[0] < 0:
@@ -223,5 +192,76 @@ while running:
         if char.curr_flip != char.flip:
             char.curr_flip = char.flip
             char.texture = pygame.transform.flip(char.texture, True, False)
+        
+
+        # Char self movement
+        char.direct[0] += char.acc[0]
+        char.direct[1] += char.acc[1]
+
+        modulo = ( char.direct[0]**2 + char.direct[1]**2 )**0.5
+        if char.acc==[0,0] and modulo > 0:
+            if modulo <= 0.075:
+                char.direct = [0, 0]
+            else:
+                if char.direct[0] != 0:
+                    char.direct[0] -= char.direct[0]/abs(char.direct[0])*0.05
+                if char.direct[1] != 0:
+                    char.direct[1] -= char.direct[1]/abs(char.direct[1])*0.05
+
+        if modulo > 1:
+            char.direct[0] /= modulo
+            char.direct[1] /= modulo
+
+
+
+        # Sun influence
+        if char.ids != 1:
+            for char2 in characters:
+                if char2.ids == 1:
+                    x2 = char2.coord[0]+char2.width/2
+                    y2 = char2.coord[1]+char2.height/2
+                    x1 = char.coord[0]+char.width/2
+                    y1 = char.coord[1]+char.height/2
+                    modulo2 = ((x2-x1)**2 + (y2-y1)**2)**0.5
+                    if modulo2 > 1 and modulo2 < 250:
+                        char.acc[0] += 1.2*(x2-x1)/(modulo2**1.5)
+                        char.acc[1] += 1.2*(y2-y1)/(modulo2**1.5)
+                    elif modulo2 <= 1:
+                        char.acc[0] += 1.2*(x2-x1)/(1)
+                        char.acc[1] += 1.2*(y2-y1)/(1)
+                    
+        char.direct[0] += char.acc[0]
+        char.direct[1] += char.acc[1]
+
+        char.coord[0] += char.direct[0] * char.speed
+        char.coord[1] += char.direct[1] * char.speed
+        
+        if char.coord[0]+char.width>WIDTH:
+            char.coord[0] = WIDTH - char.width
+            if char.direct[0]>0: char.direct[0]=0
+        elif char.coord[0] < 0:
+            char.coord[0] = 0
+            if char.direct[0]<0: char.direct[0]=0
+            
+        if char.coord[1]+char.height>HEIGHT:
+            char.coord[1] = HEIGHT - char.height
+            if char.direct[1]>0: char.direct[1]=0
+        elif char.coord[1] < 0:
+            char.coord[1] = 0
+            if char.direct[1]<0: char.direct[1]=0
+            
+        if char.ids != 1:
+            for char2 in characters:
+                if char2.ids == 1:
+                    if distance(char, char2) < 5:
+                        characters.remove(char)
+                        sounds[1].play()
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_r]:
+        characters = [
+            Character(8, "Mr.Black", [imgt+"andr.png", 100, 100, 0], [100,100], 4),
+            Character(1, "Sun", [imgt+"sun.png", 200, 200, 0], [500,500], 3),
+            Character(4, "Skufislav", [imgt+"neStas.png", 100, 100, 0], [250,100], 4)
+            ]
 
 pygame.quit()
