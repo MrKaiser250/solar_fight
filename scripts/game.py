@@ -6,15 +6,18 @@ import copy
 import math
 
 global WIDTH, HEIGHT, FPS, BACKGROUND, WHITE, SPEED, running
-global characters
+global characters, sounds, textures
 
 pygame.init()
 pygame.mixer.init()
+
+font_name = pygame.font.SysFont(None, 37)
 
 class Character:
     def __init__(self, ids=0, name="", image=["", 100, 100, 0], coord = [0, 0], speed = 3, flip = 0, direct = [0, 0], acc = [0, 0]):
         self.ids = ids
         self.name = name
+        self.name_render = font_name.render(name,True,WHITE)
         img = pygame.image.load(image[0])
         img = pygame.transform.scale(img, (image[1], image[2]))
         self.texture = img
@@ -31,6 +34,7 @@ class Character:
         new_char = Character(
             ids=copy.deepcopy(self.ids, memo),
             name=copy.deepcopy(self.name, memo),
+            name_render=copy.deepcopy(self.name_render, memo),
             texture=copy.deepcopy(self.texture, memo),
             width=copy.deepcopy(self.width, memo),
             height=copy.deepcopy(self.height, memo),
@@ -50,13 +54,20 @@ BACKGROUND = [0,0,50,0]
 WHITE = (255,255,255)
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Solar Fight v0.2")
-
+ANIM_X = 10
+ANIM_Y = 25
 
 # Characters and textures
 imgt = "images\\"
 characters = [
     Character(8, "Mr.Black", [imgt+"andr.png", 100, 100, 0], [100,100], 4),
-    Character(1, "Sun", [imgt+"sun.png", 200, 200, 0], [500,500], 3)
+    Character(1, "Sun", [imgt+"sun.png", 200, 200, 0], [500,500], 3),
+    Character(4, "Skufislav", [imgt+"neStas.png", 100, 100, 0], [250,100], 4)
+    ]
+
+# Textures
+textures = [
+    pygame.transform.scale(pygame.image.load(imgt+"background.png"), (WIDTH+2*ANIM_X, HEIGHT+2*ANIM_Y))
     ]
 
 # Sounds
@@ -67,10 +78,13 @@ sounds = [
 
 def nframe():
     global BACKGROUND
-    global characters
-    win.fill((BACKGROUND[0], BACKGROUND[1], BACKGROUND[2]))
-    vert_anim = 25*math.sin( (timer_curr[1] - timer_last[1])/1000*math.pi*2 )
-    hor_anim = 10*math.sin( (timer_curr[1] - timer_last[1])/2000*math.pi*2 )
+    global characters, textures
+    # win.fill((BACKGROUND[0], BACKGROUND[1], BACKGROUND[2]))
+    vert_anim = ANIM_Y*math.sin( (timer_curr[1] - timer_last[1])/1000*math.pi*2 )
+    hor_anim = ANIM_X*math.sin( (timer_curr[1] - timer_last[1])/2000*math.pi*2 )
+    win.blit(textures[0], (hor_anim-ANIM_X, vert_anim-ANIM_Y))
+    for char in characters:
+        win.blit(char.name_render, ( char.coord[0]+char.width//2-char.name_render.get_width()//2+hor_anim, char.coord[1]-char.name_render.get_height()+vert_anim ))
     for char in characters:
         win.blit(char.texture, ( char.coord[0]+hor_anim, char.coord[1]+vert_anim) )
     pygame.display.flip()
@@ -93,7 +107,7 @@ def exit_func():
       
 
 
-# --=Game~Code=--
+# --=Game~Code=-- #
 
 sounds[0].play()
 
@@ -106,14 +120,16 @@ while running:
     if timer_curr[1] - timer_last[1] > timer_interval[1]:
         timer_last[1] = timer_curr[1]
 
-    exit_func()
-    nframe()
-    clock.tick(FPS)
-    
     # Music
     if timer_curr[0] - timer_last[0] > timer_interval[0]:
         sounds[0].play()
         timer_last[0] = timer_curr[0]
+
+    exit_func()
+    nframe()
+    clock.tick(FPS)
+    
+    characters = sorted(characters, key= lambda x: x.coord[1]+x.height)
 
     # Background color animation
     if BACKGROUND[3] == 0:
@@ -129,27 +145,46 @@ while running:
     for char in characters:     
         
         char.acc = [0, 0]
-
+        control_check = False
 
         # Mr.Black control exclusive
         if char.ids == 8:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
                 char.acc[1]= -0.05
+                control_check = True
             if keys[pygame.K_s]:
                 char.acc[1]= 0.05
+                control_check = True
             if keys[pygame.K_a]:
                 char.acc[0]= -0.05
+                control_check = True
             if keys[pygame.K_d]:
                 char.acc[0]= 0.05
+                control_check = True
         
-        
+        # Skufislav control exclusive
+        if char.ids == 4:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP]:
+                char.acc[1]= -0.05
+                control_check = True
+            if keys[pygame.K_DOWN]:
+                char.acc[1]= 0.05
+                control_check = True
+            if keys[pygame.K_LEFT]:
+                char.acc[0]= -0.05
+                control_check = True
+            if keys[pygame.K_RIGHT]:
+                char.acc[0]= 0.05
+                control_check = True
+
 
         # Char movement
         char.direct[0] += char.acc[0]
         char.direct[1] += char.acc[1]
         modulo = ( char.direct[0]**2 + char.direct[1]**2 )**0.5
-        if (char.ids == 8 and not(keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]) and modulo > 0) or (char.ids != 8 and modulo > 0):
+        if control_check == False and modulo > 0:
             if modulo <= 0.075:
                 char.direct = [0, 0]
             else:
