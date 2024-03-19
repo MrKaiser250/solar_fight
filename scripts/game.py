@@ -84,9 +84,9 @@ def nframe():
     hor_anim = ANIM_X*math.sin( (timer_curr[1] - timer_last[1])/2000*math.pi*2 )
     win.blit(textures[0], (hor_anim-ANIM_X, vert_anim-ANIM_Y))
     for char in characters:
-        win.blit(char.name_render, ( char.coord[0]+char.width//2-char.name_render.get_width()//2+hor_anim, char.coord[1]-char.name_render.get_height()+vert_anim ))
-    for char in characters:
         win.blit(char.texture, ( char.coord[0]+hor_anim, char.coord[1]+vert_anim) )
+    for char in characters:
+        win.blit(char.name_render, ( char.coord[0]+char.width//2-char.name_render.get_width()//2+hor_anim, char.coord[1]-char.name_render.get_height()+vert_anim ))
     pygame.display.flip()
 
 def custom_delay(duration):
