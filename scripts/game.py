@@ -54,6 +54,7 @@ BACKGROUND = [0,0,10,0]
 WHITE = (255,255,255)
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Solar Fight v0.2")
+pygame.display.set_icon(pygame.image.load("images\\icon.png"))
 ANIM_X = 10
 ANIM_Y = 25
 
