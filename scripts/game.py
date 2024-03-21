@@ -17,9 +17,8 @@ class Character:
     def __init__(self, ids=0, name="", image=["", 100, 100, 0], coord=[0, 0], speed=3, AI=[False, 0, 0], flip=0, direct=[0, 0], acc=[0, 0]):
         self.ids = ids
         self.name = name
-        # Assuming font_name and WHITE are defined elsewhere
         self.name_render = font_name.render(name, True, WHITE)
-        self.image = list(image)  # Assigning image as an attribute
+        self.image = list(image)
         img = pygame.image.load(image[0])
         img = pygame.transform.scale(img, (image[1], image[2]))
         self.texture = img
@@ -46,7 +45,6 @@ class Character:
             direct=copy.deepcopy(self.direct, memo),
             acc=copy.deepcopy(self.acc, memo)
         )
-        # Assuming font_name and WHITE are defined elsewhere
         new_char.name_render = font_name.render(new_char.name, True, WHITE)
         return new_char
 
