@@ -128,7 +128,9 @@ textures = [
 sd = "sounds\\"
 sounds = [
     pygame.mixer.Sound(sd+"music.mp3"),
-    pygame.mixer.Sound(sd+"eaten.mp3")
+    pygame.mixer.Sound(sd+"eaten.mp3"),
+    pygame.mixer.Sound(sd+"shot1.mp3"),
+    pygame.mixer.Sound(sd+"shot2.mp3")
     ]
 
 def nframe():
@@ -205,6 +207,7 @@ def attack(data, char):
             proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
             proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
             projectiles.append(proj)
+            sounds[2].play()
     if data[0]==2:
         target = closestEnemy(characters, char)
         deltaX = target.coord[0] + target.width / 2 - char.coord[0] - char.width / 2
@@ -225,7 +228,9 @@ def attack_interval(data, char):
         data2 = random.choice(attack_data_data)
         for i in range(len(data2)):
             data[i]=data2[i]
-        return data[4]
+        if data[0]==2:
+            sounds[3].play()
+        return data[1]
     elif data[3] <= 0:
         data[3] = data[2]
         data[5] -= 1
@@ -417,5 +422,7 @@ while running:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_r]:
         characters = copy.deepcopy(characters_data)
+        projectiles = []
+        attack_data = [0,0,0,0,0,0]
 
 pygame.quit()
