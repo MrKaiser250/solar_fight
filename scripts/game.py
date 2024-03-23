@@ -145,12 +145,12 @@ while running:
 
     # Background color animation
     if BACKGROUND[3] == 0:
-        BACKGROUND[2] += 1
+        BACKGROUND[2] += 2
     elif BACKGROUND[3] == 1:
-        BACKGROUND[2] -= 1  
-    if BACKGROUND[3] == 0 and BACKGROUND[2] >= 30:
+        BACKGROUND[2] -= 2  
+    if BACKGROUND[3] == 0 and BACKGROUND[2] >= 80:
         BACKGROUND[3] = 1
-    elif BACKGROUND[3] == 1 and BACKGROUND[2] <= 10:
+    elif BACKGROUND[3] == 1 and BACKGROUND[2] <= 40:
         BACKGROUND[3] = 0
 
     # Character in-game processing
