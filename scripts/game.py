@@ -5,6 +5,7 @@ import pygame
 import math
 import copy
 import random
+import os
 
 global WIDTH, HEIGHT, FPS, BACKGROUND, WHITE, SPEED, running
 global characters, sounds, textures
@@ -13,6 +14,28 @@ pygame.init()
 pygame.mixer.init()
 
 font_name = pygame.font.SysFont("Impact", 37)
+
+
+def split_folder_into_frames(folder_path, target_width, target_height):
+    frames = []
+    # Get a list of all files in the folder
+    file_names = os.listdir(folder_path)
+    # Sort the file names alphabetically
+    sorted_file_names = sorted(file_names)
+    # Loop through sorted file names
+    for file_name in sorted_file_names:
+        # Check if the file is a PNG
+        if file_name.endswith('.png'):
+            # Construct the full path to the image file
+            file_path = os.path.join(folder_path, file_name)
+            # Load the image file
+            frame_surface = pygame.image.load(file_path).convert_alpha()
+            # Transform the frame to the target width and height
+            frame_surface = pygame.transform.scale(frame_surface, (target_width, target_height))
+            # Append the frame to the list of frames
+            frames.append(frame_surface)
+    return frames
+
 
 class Character:
     def __init__(self, ids=0, name="", image=["", 100, 100, 0], coord=[0, 0], speed=3, AI=[False, 0, 0], flip=0, direct=[0, 0], acc=[0, 0]):
@@ -55,9 +78,14 @@ class Projectile:
         self.ids = ids
         self.name = name
         self.image = list(image)
-        img = pygame.image.load(image[0])
-        img = pygame.transform.scale(img, (image[1], image[2]))
-        self.texture = img
+        if os.path.isdir(image[0]):  # Check if the path is a directory
+            self.frames = split_folder_into_frames(image[0], image[1], image[2])  # Load frames from folder
+            self.current_frame_index = 0
+            self.texture = self.frames[self.current_frame_index] if self.frames else None
+        else:  # If not a directory, assume it's a single image
+            img = pygame.image.load(image[0])
+            img = pygame.transform.scale(img, (image[1], image[2]))
+            self.texture = img
         self.width = image[1]
         self.height = image[2]
         self.coord = list(coord)
@@ -86,6 +114,11 @@ class Projectile:
     def direct_with_rotation(self):
         self.direct[0] = math.cos(math.radians(self.rotation))
         self.direct[1] = math.sin(math.radians(self.rotation))
+        
+    def update_animation(self):
+        if hasattr(self, 'frames'):  # Check if frames exist (i.e., if it's a GIF)
+            self.current_frame_index = (self.current_frame_index + 1) % len(self.frames)
+            self.texture = self.frames[self.current_frame_index]
 
 clock = pygame.time.Clock()
 WIDTH, HEIGHT = 1280, 720
@@ -107,13 +140,14 @@ characters_data = [
     ]
 
 projectiles_data = [
-    Projectile(1, "Wave", [imgt+"wave.png", 40, 20], [0,0], 12, [0,0], 0, [0,0], 10000),
-    Projectile(1, "Wave", [imgt+"wave.png", 40, 20], [0,0], 15, [0,0], 0, [0,0], 10000)
+    Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 10, [0,0], 0, [0,0], 10000),
+    Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 13, [0,0], 0, [0,0], 10000)
     ]
 
 attack_data_data = [
     [1,100,3,3,2000,7],
-    [2,50,100,100,5000,1]
+    [2,50,100,100,5000,1],
+    [3,100,100,100,5000,1]
     ]
 
 characters = copy.deepcopy(characters_data)
@@ -145,6 +179,8 @@ def nframe():
     for char in characters:
         win.blit(char.name_render, ( char.coord[0]+char.width//2-char.name_render.get_width()//2+hor_anim, char.coord[1]-char.name_render.get_height()+vert_anim ))
     for proj in projectiles:
+        proj.update_animation()
+        proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
         win.blit(proj.texture, ( proj.coord[0]+hor_anim, proj.coord[1]+vert_anim ) )
     pygame.display.flip()
 
@@ -163,7 +199,9 @@ def exit_func():
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-      
+    
+
+
 def distanceCHAR(char1, char2):
     return ((char1.coord[0]+char1.width/2-char2.coord[0]-char2.width/2)**2 + (char1.coord[1]+char1.height/2-char2.coord[1]-char2.height/2)**2)**0.5
 
@@ -193,8 +231,11 @@ def angle(x, y):
         angle_deg += 360
     return angle_deg
 
+
+ROTATION_ATTACK = 0
+
 def attack(data, char):
-    global projectiles
+    global projectiles, ROTATION_ATTACK
     if data[0]==1:
         if len(characters)>1:
             target = closestEnemy(characters, char)
@@ -208,7 +249,7 @@ def attack(data, char):
             proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
             projectiles.append(proj)
             sounds[2].play()
-    if data[0]==2:
+    elif data[0]==2:
         target = closestEnemy(characters, char)
         deltaX = target.coord[0] + target.width / 2 - char.coord[0] - char.width / 2
         deltaY = target.coord[1] + target.height / 2 - char.coord[1] - char.height / 2
@@ -219,12 +260,23 @@ def attack(data, char):
         proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
         proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
         projectiles.append(proj)
+    elif data[0]==3:
+        proj = copy.deepcopy(projectiles_data[1])
+        proj.rotation = ROTATION_ATTACK
+        ROTATION_ATTACK = (ROTATION_ATTACK + 5) % 360
+        proj.direct_with_rotation()
+        proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
+        proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
+        proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
+        projectiles.append(proj)
         
         
 
 def attack_interval(data, char):
-    global attack_data_data
+    global attack_data_data, ROTATION_ATTACK
     if data[5] <= 0:
+        ROTATION_ATTACK = random.randint(0, 359)
+
         data2 = random.choice(attack_data_data)
         for i in range(len(data2)):
             data[i]=data2[i]
