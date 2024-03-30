@@ -140,14 +140,20 @@ characters_data = [
     ]
 
 projectiles_data = [
+    Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 9, [0,0], 0, [0,0], 10000),
+    Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 12, [0,0], 0, [0,0], 10000),
     Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 10, [0,0], 0, [0,0], 10000),
-    Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 13, [0,0], 0, [0,0], 10000)
+    Projectile(2, "Nitrino", [imgt+"nitrin.png", 10, 10], [0,0], 8, [0,0], 0, [0,0], 10000)
     ]
 
 attack_data_data = [
     [1,100,3,3,2000,7],
     [2,50,100,100,5000,1],
-    [3,100,100,100,5000,1]
+    [3,200,80,80,5000,1],
+    [4,5,200,200,5000,1],
+    [4,5,200,200,5000,1],
+    [4,5,200,200,5000,1],
+    [4,5,200,200,5000,1],
     ]
 
 characters = copy.deepcopy(characters_data)
@@ -180,7 +186,8 @@ def nframe():
         win.blit(char.name_render, ( char.coord[0]+char.width//2-char.name_render.get_width()//2+hor_anim, char.coord[1]-char.name_render.get_height()+vert_anim ))
     for proj in projectiles:
         proj.update_animation()
-        proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
+        if proj.ids == 1:
+            proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
         win.blit(proj.texture, ( proj.coord[0]+hor_anim, proj.coord[1]+vert_anim ) )
     pygame.display.flip()
 
@@ -261,11 +268,20 @@ def attack(data, char):
         proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
         projectiles.append(proj)
     elif data[0]==3:
-        proj = copy.deepcopy(projectiles_data[1])
+        proj = copy.deepcopy(projectiles_data[2])
         proj.rotation = ROTATION_ATTACK
-        ROTATION_ATTACK = (ROTATION_ATTACK + 5) % 360
+        ROTATION_ATTACK = (ROTATION_ATTACK + 20) % 360
         proj.direct_with_rotation()
         proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
+        proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
+        proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
+        projectiles.append(proj)
+    elif data[0]==4:
+        proj = copy.deepcopy(projectiles_data[3])
+        proj.rotation = ROTATION_ATTACK
+        N = 7
+        ROTATION_ATTACK = (ROTATION_ATTACK + int(360//(N-0.5))) % 360
+        proj.direct_with_rotation()
         proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
         proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
         projectiles.append(proj)
