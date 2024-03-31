@@ -437,8 +437,8 @@ while running:
         if char.AI[0]==True:
             
             if distanceTO(char, char.AI[1], char.AI[2])<=10:
-                char.AI[1] = random.randint(char.width//2, WIDTH-char.width//2)
-                char.AI[2] = random.randint(char.height//2, HEIGHT-char.height//2)
+                char.AI[1] = random.randint(char.width//2+ANIM_X, WIDTH-char.width//2-ANIM_X)
+                char.AI[2] = random.randint(char.height//2+ANIM_Y, HEIGHT-char.height//2-ANIM_Y)
                 
             x2 = char.coord[0]+char.width/2
             y2 = char.coord[1]+char.height/2
