@@ -18,21 +18,13 @@ font_name = pygame.font.SysFont("Impact", 37)
 
 def split_folder_into_frames(folder_path, target_width, target_height):
     frames = []
-    # Get a list of all files in the folder
     file_names = os.listdir(folder_path)
-    # Sort the file names alphabetically
     sorted_file_names = sorted(file_names)
-    # Loop through sorted file names
     for file_name in sorted_file_names:
-        # Check if the file is a PNG
         if file_name.endswith('.png'):
-            # Construct the full path to the image file
             file_path = os.path.join(folder_path, file_name)
-            # Load the image file
             frame_surface = pygame.image.load(file_path).convert_alpha()
-            # Transform the frame to the target width and height
             frame_surface = pygame.transform.scale(frame_surface, (target_width, target_height))
-            # Append the frame to the list of frames
             frames.append(frame_surface)
     return frames
 
@@ -143,14 +135,20 @@ projectiles_data = [
     Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 9, [0,0], 0, [0,0], 10000),
     Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 12, [0,0], 0, [0,0], 10000),
     Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 10, [0,0], 0, [0,0], 10000),
-    Projectile(2, "Nitrino", [imgt+"nitrin.png", 20, 20], [0,0], 8, [0,0], 0, [0,0], 10000)
+    Projectile(2, "Nitrino", [imgt+"nitrin.png", 20, 20], [0,0], 8, [0,0], 0, [0,0], 10000),
+    Projectile(2, "Nitrino", [imgt+"nitrin.png", 20, 20], [0,0], 12, [0,0], 0, [0,0], 10000),
+    Projectile(1, "Wave", [imgt+"wave\\", 40, 20], [0,0], 14, [0,0], 0, [0,0], 10000),
+    Projectile(3, "Alpha", [imgt+"alpha.png", 20, 20], [0,0], 6, [0,0], 0, [0,0], 10000),
     ]
 
 attack_data_data = [
-    [1,100,3,3,2000,7],
+    [1,75,5,5,2000,7],
     [2,75,100,100,5000,1],
     [3,200,80,80,5000,1],
-    [4,5,200,200,5000,1]
+    [4,5,200,200,5000,1],
+    [5,5,250,250,5000,1],
+    [6,500,15,15,1500,1],
+    [7,1000,10,10,2000,1]
     ]
 
 characters = copy.deepcopy(characters_data)
@@ -183,9 +181,7 @@ def nframe():
         win.blit(char.name_render, ( char.coord[0]+char.width//2-char.name_render.get_width()//2+hor_anim, char.coord[1]-char.name_render.get_height()+vert_anim ))
     for proj in projectiles:
         proj.update_animation()
-        if proj.ids == 1:
-            proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
-        win.blit(proj.texture, ( proj.coord[0]+hor_anim, proj.coord[1]+vert_anim ) )
+        win.blit( pygame.transform.rotate(proj.texture, -proj.rotation) , ( proj.coord[0]+hor_anim, proj.coord[1]+vert_anim ) )
     pygame.display.flip()
 
 def custom_delay(duration):
@@ -220,12 +216,25 @@ def closestEnemy(characters, char):
     closest_enemy = None
     
     for char2 in characters:
-        if char2.ids != char.ids:  # Ensure char2 is not the same character
+        if char2.ids != char.ids:
             distance = distanceCHAR(char2, char)
             if distance < min_distance:
                 min_distance = distance
                 closest_enemy = char2
                 
+    return closest_enemy
+
+def closestEnemy2(characters, proj):
+    min_distance = float('inf')
+    closest_enemy = None
+    
+    for char2 in characters:
+        if char2.ids!=1:
+            distance = distanceCHAR(char2, proj)
+            if distance < min_distance:
+                min_distance = distance
+                closest_enemy = char2
+           
     return closest_enemy
 
 def angle(x, y):
@@ -234,6 +243,9 @@ def angle(x, y):
     if angle_deg < 0:
         angle_deg += 360
     return angle_deg
+
+def cosVec(x1,y1,x2,y2):
+    return (x1*x2+y1*y2)/((x1**2 + y1**2)**0.5 * (x2**2 + y2**2)**0.5)
 
 
 ROTATION_ATTACK = 0
@@ -254,16 +266,17 @@ def attack(data, char):
             projectiles.append(proj)
             sounds[2].play()
     elif data[0]==2:
-        target = closestEnemy(characters, char)
-        deltaX = target.coord[0] + target.width / 2 - char.coord[0] - char.width / 2
-        deltaY = target.coord[1] + target.height / 2 - char.coord[1] - char.height / 2
-        proj = copy.deepcopy(projectiles_data[1])
-        proj.rotation = angle(deltaX, deltaY)
-        proj.direct_with_rotation()
-        proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
-        proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
-        proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
-        projectiles.append(proj)
+        if len(characters)>1:
+            target = closestEnemy(characters, char)
+            deltaX = target.coord[0] + target.width / 2 - char.coord[0] - char.width / 2
+            deltaY = target.coord[1] + target.height / 2 - char.coord[1] - char.height / 2
+            proj = copy.deepcopy(projectiles_data[1])
+            proj.rotation = angle(deltaX, deltaY)
+            proj.direct_with_rotation()
+            proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
+            proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
+            proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
+            projectiles.append(proj)
     elif data[0]==3:
         proj = copy.deepcopy(projectiles_data[2])
         proj.rotation = ROTATION_ATTACK
@@ -282,6 +295,41 @@ def attack(data, char):
         proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
         proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
         projectiles.append(proj)
+    elif data[0]==5:
+        proj = copy.deepcopy(projectiles_data[4])
+        proj.rotation = ROTATION_ATTACK
+        ROTATION_ATTACK = ROTATION_ATTACK + 120.5
+        while ROTATION_ATTACK >= 360:
+            ROTATION_ATTACK -= 360
+        proj.direct_with_rotation()
+        proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
+        proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
+        projectiles.append(proj)
+    elif data[0]==6:
+        if len(characters)>1:
+            target = closestEnemy(characters, char)
+            deltaX = target.coord[0] + target.width / 2 - char.coord[0] - char.width / 2
+            deltaY = target.coord[1] + target.height / 2 - char.coord[1] - char.height / 2
+            proj = copy.deepcopy(projectiles_data[5])
+            proj.rotation = angle(deltaX, deltaY)
+            proj.direct_with_rotation()
+            proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
+            proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
+            proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
+            projectiles.append(proj)
+            sounds[2].play()
+    elif data[0]==7:
+        if len(characters)>1:
+            target = closestEnemy(characters, char)
+            deltaX = target.coord[0] + target.width / 2 - char.coord[0] - char.width / 2
+            deltaY = target.coord[1] + target.height / 2 - char.coord[1] - char.height / 2
+            proj = copy.deepcopy(projectiles_data[6])
+            proj.rotation = angle(deltaX, deltaY)
+            proj.direct_with_rotation()
+            proj.texture = pygame.transform.rotate(proj.texture, -proj.rotation)
+            proj.coord[0] = char.coord[0] - proj.texture.get_width()/2 + char.width/2
+            proj.coord[1] = char.coord[1] - proj.texture.get_height()/2 + char.height/2
+            projectiles.append(proj)
         
         
 
@@ -312,7 +360,8 @@ sounds[0].play()
 
 timer_last = [pygame.time.get_ticks(), pygame.time.get_ticks(), pygame.time.get_ticks()]
 timer_interval = [(sounds[0].get_length()+1)*1000, 2000, 0]
-attack_data = [0, 0, 0, 0, 0, 0] # Attack type, time between units, number of units, number of units (curr), time between attacks, number of attacks
+#attack_data = copy.deepcopy(attack_data_data[6])
+attack_data = [0,0,0,0,0,0] # Attack type, time between units, number of units, number of units (curr), time between attacks, number of attacks
 attack_data2 = []
 running = True
 while running:
@@ -476,11 +525,39 @@ while running:
     for proj in projectiles:
         if pygame.time.get_ticks() - proj.birth_time > proj.death_timer:
             projectiles.remove(proj)
-        else:            
+        else:
+            proj.acc[0] = 0
+            proj.acc[1] = 0
+
+            if proj.ids == 3:
+                proj.rotation += 5
+                
+                charTarget = closestEnemy2(characters, proj)
+                
+                x2 = charTarget.coord[0]+charTarget.texture.get_width()/2
+                y2 = charTarget.coord[1]+charTarget.texture.get_height()/2
+                x1 = proj.coord[0]+proj.width/2
+                y1 = proj.coord[1]+proj.height/2
+                modulo2 = ((x2-x1)**2 + (y2-y1)**2)**0.5
+                if modulo2 > 30 and modulo2 < 200:
+                    proj.acc[0] += 0.08*(x2-x1)/(modulo2**1.2)
+                    proj.acc[1] += 0.08*(y2-y1)/(modulo2**1.2)
+                elif modulo2 <= 30:
+                    proj.acc[0] += 0.08*(x2-x1)/(30**1.2)
+                    proj.acc[1] += 0.08*(y2-y1)/(30**1.2)
+                
+                
+                
+                
             proj.direct[0] += proj.acc[0]
             proj.direct[1] += proj.acc[1]
             proj.coord[0] += proj.direct[0] * proj.speed
             proj.coord[1] += proj.direct[1] * proj.speed
+            
+            if proj.ids == 3:
+                modulo3 = (proj.direct[0]**2 + proj.direct[1]**2)**0.5
+                proj.direct[0] /= modulo3
+                proj.direct[1] /= modulo3
             
         
 
