@@ -522,20 +522,21 @@ while running:
 
             if proj.ids == 3:
                 proj.rotation += 5
-                
-                charTarget = closestEnemy2(characters, proj)
-                
-                x2 = charTarget.coord[0]+charTarget.texture.get_width()/2
-                y2 = charTarget.coord[1]+charTarget.texture.get_height()/2
-                x1 = proj.coord[0]+proj.width/2
-                y1 = proj.coord[1]+proj.height/2
-                modulo2 = ((x2-x1)**2 + (y2-y1)**2)**0.5
-                if modulo2 > 30 and modulo2 < 200:
-                    proj.acc[0] += 0.08*(x2-x1)/(modulo2**1.2)
-                    proj.acc[1] += 0.08*(y2-y1)/(modulo2**1.2)
-                elif modulo2 <= 30:
-                    proj.acc[0] += 0.08*(x2-x1)/(30**1.2)
-                    proj.acc[1] += 0.08*(y2-y1)/(30**1.2)
+                if len(characters) > 1:
+
+                    charTarget = closestEnemy2(characters, proj)
+                    
+                    x2 = charTarget.coord[0]+charTarget.texture.get_width()/2
+                    y2 = charTarget.coord[1]+charTarget.texture.get_height()/2
+                    x1 = proj.coord[0]+proj.width/2
+                    y1 = proj.coord[1]+proj.height/2
+                    modulo2 = ((x2-x1)**2 + (y2-y1)**2)**0.5
+                    if modulo2 > 30 and modulo2 < 200:
+                        proj.acc[0] += 0.08*(x2-x1)/(modulo2**1.2)
+                        proj.acc[1] += 0.08*(y2-y1)/(modulo2**1.2)
+                    elif modulo2 <= 30:
+                        proj.acc[0] += 0.08*(x2-x1)/(30**1.2)
+                        proj.acc[1] += 0.08*(y2-y1)/(30**1.2)
                 
                 
                 
