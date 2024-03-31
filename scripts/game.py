@@ -399,39 +399,30 @@ while running:
             timer_interval[2] = attack_interval(attack_data, char)
 
         char.acc = [0, 0]
-        control_check = False
 
         # Mr.Black control exclusive
         if char.ids == 8:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
-                char.acc[1]= -0.05
-                control_check = True
+                char.acc[1]+= -0.05
             if keys[pygame.K_s]:
-                char.acc[1]= 0.05
-                control_check = True
+                char.acc[1]+= 0.05
             if keys[pygame.K_a]:
-                char.acc[0]= -0.05
-                control_check = True
+                char.acc[0]+= -0.05
             if keys[pygame.K_d]:
-                char.acc[0]= 0.05
-                control_check = True
+                char.acc[0]+= 0.05
         
         # Skufislav control exclusive
         if char.ids == 4:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_UP]:
-                char.acc[1]= -0.05
-                control_check = True
+                char.acc[1]+= -0.05
             if keys[pygame.K_DOWN]:
-                char.acc[1]= 0.05
-                control_check = True
+                char.acc[1]+= 0.05
             if keys[pygame.K_LEFT]:
-                char.acc[0]= -0.05
-                control_check = True
+                char.acc[0]+= -0.05
             if keys[pygame.K_RIGHT]:
-                char.acc[0]= 0.05
-                control_check = True
+                char.acc[0]+= 0.05
 
         # Flip
         if char.flip == 0 and char.acc[0] > 0:
@@ -501,17 +492,17 @@ while running:
         char.coord[0] += char.direct[0] * char.speed
         char.coord[1] += char.direct[1] * char.speed
         
-        if char.coord[0]+char.width>WIDTH:
+        if char.coord[0]+char.width>WIDTH-ANIM_X:
             char.coord[0] = WIDTH - char.width
             if char.direct[0]>0: char.direct[0]=0
-        elif char.coord[0] < 0:
+        elif char.coord[0] < ANIM_X:
             char.coord[0] = 0
             if char.direct[0]<0: char.direct[0]=0
             
-        if char.coord[1]+char.height>HEIGHT:
+        if char.coord[1]+char.height>HEIGHT-ANIM_Y:
             char.coord[1] = HEIGHT - char.height
             if char.direct[1]>0: char.direct[1]=0
-        elif char.coord[1] < 0:
+        elif char.coord[1] < ANIM_Y:
             char.coord[1] = 0
             if char.direct[1]<0: char.direct[1]=0
             
@@ -551,13 +542,14 @@ while running:
                 
             proj.direct[0] += proj.acc[0]
             proj.direct[1] += proj.acc[1]
-            proj.coord[0] += proj.direct[0] * proj.speed
-            proj.coord[1] += proj.direct[1] * proj.speed
-            
-            if proj.ids == 3:
-                modulo3 = (proj.direct[0]**2 + proj.direct[1]**2)**0.5
+			
+            modulo3 = (proj.direct[0]**2 + proj.direct[1]**2)**0.5
+            if modulo3 > 0:
                 proj.direct[0] /= modulo3
                 proj.direct[1] /= modulo3
+			
+            proj.coord[0] += proj.direct[0] * proj.speed
+            proj.coord[1] += proj.direct[1] * proj.speed
             
         
 
