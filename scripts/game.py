@@ -493,17 +493,17 @@ while running:
         char.coord[1] += char.direct[1] * char.speed
         
         if char.coord[0]+char.width>WIDTH-ANIM_X:
-            char.coord[0] = WIDTH - char.width
+            char.coord[0] = WIDTH - char.width - ANIM_X
             if char.direct[0]>0: char.direct[0]=0
         elif char.coord[0] < ANIM_X:
-            char.coord[0] = 0
+            char.coord[0] = ANIM_X
             if char.direct[0]<0: char.direct[0]=0
             
         if char.coord[1]+char.height>HEIGHT-ANIM_Y:
-            char.coord[1] = HEIGHT - char.height
+            char.coord[1] = HEIGHT - char.height - ANIM_Y
             if char.direct[1]>0: char.direct[1]=0
         elif char.coord[1] < ANIM_Y:
-            char.coord[1] = 0
+            char.coord[1] = ANIM_Y
             if char.direct[1]<0: char.direct[1]=0
             
         if char.ids != 1:
